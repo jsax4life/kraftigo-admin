@@ -27,13 +27,21 @@ export function getPermissionsForRole(role: AdminRole): Permission[] {
 }
 
 export function canAccess(
-  user: Pick<AdminUser, "role"> | null | undefined,
+  user: Pick<AdminUser, "roles"> | null | undefined,
   permission: Permission
 ): boolean {
-  if (!user) return false;
-  if (user.role === "SUPER_ADMIN") return true;
-  const rolePermissions = new Set(ROLE_PERMISSIONS[user.role]);
-  if (rolePermissions.has("FULL_ACCESS")) return true;
-  return rolePermissions.has(permission);
+  if (!user || !user.roles || user.roles.length === 0) return false;
+  
+  // Check if user has SUPER_ADMIN role (full access)
+  if (user.roles.includes("SUPER_ADMIN")) return true;
+  
+  // Check if any of the user's roles have the required permission
+  for (const role of user.roles) {
+    const rolePermissions = new Set(ROLE_PERMISSIONS[role]);
+    if (rolePermissions.has("FULL_ACCESS")) return true;
+    if (rolePermissions.has(permission)) return true;
+  }
+  
+  return false;
 }
 
