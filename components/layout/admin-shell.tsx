@@ -15,7 +15,8 @@ import {
   Bell,
   Search,
   Menu,
-  ChevronLeft
+  ChevronLeft,
+  BadgeCheck
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -23,6 +24,11 @@ const navItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/waitlist", label: "Waitlist", icon: ListChecks },
   { href: "/admin/krafters", label: "Krafters", icon: Wrench },
+  {
+    href: "/admin/work-eligibility",
+    label: "Work eligibility",
+    icon: BadgeCheck
+  },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/bookings", label: "Bookings", icon: BriefcaseBusiness },
   { href: "/admin/services", label: "Services", icon: Wrench },

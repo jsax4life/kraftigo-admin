@@ -9,6 +9,7 @@ const PUBLIC_PATHS = ["/login", "/_next", "/favicon.ico"];
 function requiredPermissionForPath(pathname: string): Permission | null {
   if (pathname.startsWith("/admin/analytics")) return "VIEW_ANALYTICS";
   if (pathname.startsWith("/admin/krafters")) return "MANAGE_USERS";
+  if (pathname.startsWith("/admin/work-eligibility")) return "MANAGE_USERS";
   if (pathname.startsWith("/admin/customers")) return "VIEW_USERS";
   if (pathname.startsWith("/admin/bookings")) return "VIEW_BOOKINGS";
   if (pathname.startsWith("/admin/services")) return "MANAGE_SERVICES";

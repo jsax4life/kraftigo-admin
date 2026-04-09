@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import {
-  WorkEligibilityListSchema,
-  WorkEligibilitySubmissionSchema,
+  WorkEligibilitySubmissionApiSchema,
+  normalizeWorkEligibilitySubmission,
   type ReviewWorkEligibilityDocumentDto,
   type WorkEligibilityStatus,
   type WorkEligibilitySubmission
@@ -27,12 +27,12 @@ function unwrapEntityPayload(data: unknown): unknown {
 }
 
 function parseSubmission(raw: unknown): WorkEligibilitySubmission {
-  const parsed = WorkEligibilitySubmissionSchema.safeParse(raw);
+  const parsed = WorkEligibilitySubmissionApiSchema.safeParse(raw);
   if (!parsed.success) {
     console.error("Work eligibility item validation error", parsed.error);
     throw new Error("Unexpected work eligibility document shape");
   }
-  return parsed.data;
+  return normalizeWorkEligibilitySubmission(parsed.data);
 }
 
 export type WorkEligibilityListParams = {
@@ -49,12 +49,14 @@ export const workEligibilityService = {
       }
     });
     const rows = unwrapListPayload(res.data);
-    const parsed = WorkEligibilityListSchema.safeParse(rows);
-    if (!parsed.success) {
-      console.error("Work eligibility list validation error", parsed.error);
-      throw new Error("Unexpected work eligibility list response shape");
-    }
-    return parsed.data;
+    return rows.map((row, index) => {
+      try {
+        return parseSubmission(row);
+      } catch (e) {
+        console.error(`Work eligibility list row ${index} error`, e);
+        throw new Error("Unexpected work eligibility list response shape");
+      }
+    });
   },
 
   async getById(id: string): Promise<WorkEligibilitySubmission> {

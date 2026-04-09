@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useWorkEligibilityDocument } from "@/hooks/useWorkEligibilityDocument";
 import { workEligibilityService } from "@/services/work-eligibility.service";
 import {
@@ -62,6 +62,13 @@ export default function WorkEligibilityDetailPage() {
 
   const [rejectReason, setRejectReason] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
+  const [showRejectForm, setShowRejectForm] = useState(false);
+
+  useEffect(() => {
+    setShowRejectForm(false);
+    setRejectReason("");
+    setLocalError(null);
+  }, [id]);
 
   const reviewMutation = useMutation({
     mutationFn: ({
@@ -82,8 +89,15 @@ export default function WorkEligibilityDetailPage() {
 
   function handleApprove() {
     if (!id) return;
+    setShowRejectForm(false);
     setLocalError(null);
     reviewMutation.mutate({ id, body: { status: "APPROVED" } });
+  }
+
+  function cancelReject() {
+    setShowRejectForm(false);
+    setRejectReason("");
+    setLocalError(null);
   }
 
   function handleReject() {
@@ -205,33 +219,58 @@ export default function WorkEligibilityDetailPage() {
                 >
                   Approve
                 </button>
-              </div>
-              <div className="space-y-2">
-                <label className="block text-[10px] uppercase tracking-wide text-slate-500">
-                  Rejection reason (required to reject, max {REJECTION_MAX}{" "}
-                  chars)
-                </label>
-                <textarea
-                  className="min-h-[100px] w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs outline-none focus:border-rose-400"
-                  placeholder="Explain why this document is rejected…"
-                  value={rejectReason}
-                  maxLength={REJECTION_MAX}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                />
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-slate-500">
-                    {rejectReason.length} / {REJECTION_MAX}
-                  </span>
+                {!showRejectForm && (
                   <button
                     type="button"
-                    onClick={handleReject}
+                    onClick={() => {
+                      setShowRejectForm(true);
+                      setLocalError(null);
+                    }}
                     disabled={reviewMutation.isPending}
-                    className="rounded-full border border-rose-500/50 bg-rose-500/15 px-4 py-2 text-xs font-medium text-rose-200 hover:bg-rose-500/25 disabled:opacity-50"
+                    className="rounded-full border border-slate-600 bg-slate-900 px-4 py-2 text-xs font-medium text-slate-200 hover:border-rose-500/40 hover:text-rose-200 disabled:opacity-50"
                   >
-                    Reject
+                    Reject…
                   </button>
-                </div>
+                )}
               </div>
+              {showRejectForm && (
+                <div className="space-y-2 border-t border-slate-800 pt-3">
+                  <label className="block text-[10px] uppercase tracking-wide text-slate-500">
+                    Rejection reason (required, max {REJECTION_MAX} chars)
+                  </label>
+                  <textarea
+                    className="min-h-[100px] w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-xs outline-none focus:border-rose-400"
+                    placeholder="Explain why this document is rejected…"
+                    value={rejectReason}
+                    maxLength={REJECTION_MAX}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    aria-label="Rejection reason"
+                  />
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[10px] text-slate-500">
+                      {rejectReason.length} / {REJECTION_MAX}
+                    </span>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={cancelReject}
+                        disabled={reviewMutation.isPending}
+                        className="rounded-full border border-slate-600 bg-slate-950 px-3 py-2 text-xs text-slate-300 hover:border-slate-500 disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleReject}
+                        disabled={reviewMutation.isPending}
+                        className="rounded-full border border-rose-500/50 bg-rose-500/15 px-4 py-2 text-xs font-medium text-rose-200 hover:bg-rose-500/25 disabled:opacity-50"
+                      >
+                        Confirm rejection
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
           )}
 
