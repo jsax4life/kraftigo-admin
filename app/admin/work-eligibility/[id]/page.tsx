@@ -246,11 +246,3 @@ export default function WorkEligibilityDetailPage() {
     </div>
   );
 }
-
-```
-
-</think>
-Fixing the mutation: the service expects `(id, body)` but the mutation uses a single object.
-
-<｜tool▁calls▁begin｜><｜tool▁call▁begin｜>
-StrReplace
