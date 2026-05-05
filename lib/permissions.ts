@@ -17,7 +17,13 @@ const ROLE_PERMISSIONS: Record<AdminRole, Permission[]> = {
     "VIEW_BOOKINGS",
     "VIEW_ANALYTICS"
   ],
-  ADMIN: ["MANAGE_USERS", "MANAGE_SERVICES", "VIEW_USERS", "VIEW_ANALYTICS"],
+  ADMIN: [
+    "MANAGE_USERS",
+    "MANAGE_SERVICES",
+    "VIEW_USERS",
+    "VIEW_BOOKINGS",
+    "VIEW_ANALYTICS"
+  ],
   SUPPORT: ["VIEW_USERS", "VIEW_BOOKINGS"],
   ANALYST: ["VIEW_ANALYTICS"]
 };
@@ -43,5 +49,14 @@ export function canAccess(
   }
   
   return false;
+}
+
+/** POST /api/admin/bookings/expire-overdue/run is restricted to ADMIN (and super-admin) on the API. */
+export function canTriggerBookingExpireOverdueSweep(
+  user: Pick<AdminUser, "roles"> | null | undefined
+): boolean {
+  if (!user?.roles?.length) return false;
+  if (user.roles.includes("SUPER_ADMIN")) return true;
+  return user.roles.includes("ADMIN");
 }
 
