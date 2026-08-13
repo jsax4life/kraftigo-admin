@@ -1,4 +1,16 @@
+"use client";
+
+import { StatCard } from "@/components/ui/stat-card";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+
+function formatCount(value: number | undefined): string {
+  if (value == null) return "—";
+  return value.toLocaleString();
+}
+
 export default function DashboardPage() {
+  const { data, isLoading, isError, error } = useDashboardStats();
+
   return (
     <div className="space-y-4">
       <div>
@@ -7,26 +19,60 @@ export default function DashboardPage() {
           High-level overview of Kraftigo marketplace activity.
         </p>
       </div>
-      {/* Metrics & charts scaffold – to be wired to real data services */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Total Users</p>
-          <p className="mt-2 text-xl font-semibold">—</p>
-        </div>
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Active Krafters</p>
-          <p className="mt-2 text-xl font-semibold">—</p>
-        </div>
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Open Bookings</p>
-          <p className="mt-2 text-xl font-semibold">—</p>
-        </div>
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <p className="text-xs text-slate-400">Waitlist Signups</p>
-          <p className="mt-2 text-xl font-semibold">Live on Waitlist</p>
-        </div>
+
+      {isError && (
+        <p className="text-xs text-rose-300">
+          Failed to load stats: {error?.message ?? "Unknown error"}
+        </p>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Total Users"
+          value={isLoading ? "…" : formatCount(data?.totalUsers)}
+        />
+        <StatCard
+          label="Active Krafters"
+          value={isLoading ? "…" : formatCount(data?.activeKrafters)}
+          hint="ARTISAN + ACTIVE"
+          href="/admin/krafters"
+        />
+        <StatCard
+          label="Open Bookings"
+          value={isLoading ? "…" : formatCount(data?.openBookings)}
+          href="/admin/bookings"
+        />
+        <StatCard
+          label="Total Bookings"
+          value={isLoading ? "…" : formatCount(data?.totalBookings)}
+          href="/admin/bookings"
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="All Krafters"
+          value={isLoading ? "…" : formatCount(data?.allKrafters)}
+          href="/admin/krafters"
+        />
+        <StatCard
+          label="All Customers"
+          value={isLoading ? "…" : formatCount(data?.allCustomers)}
+          href="/admin/customers"
+        />
+        <StatCard
+          label="Intent Krafters"
+          value={isLoading ? "…" : formatCount(data?.intentKrafters)}
+          hint="Started artisan onboarding"
+          href="/admin/krafters?tab=intent"
+        />
+        <StatCard
+          label="Waitlist"
+          value="View"
+          hint="Live signups"
+          href="/admin/waitlist"
+        />
       </div>
     </div>
   );
 }
-

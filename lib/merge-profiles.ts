@@ -1,0 +1,50 @@
+import type { AdminProfileRow } from "@/types/admin-profiles";
+import type { AdminUserRow, AdminUserWithProfile } from "@/types/admin-users";
+
+export function mergeUsersWithProfiles(
+  users: AdminUserRow[],
+  profiles: AdminProfileRow[]
+): AdminUserWithProfile[] {
+  const byUserId = new Map<string, AdminProfileRow>();
+
+  for (const profile of profiles) {
+    const key = profile.userId ?? profile.id;
+    if (key) byUserId.set(key, profile);
+  }
+
+  return users.map((user) => ({
+    ...user,
+    profile: byUserId.get(user.id)
+  }));
+}
+
+export function profileDisplayName(
+  user: AdminUserRow,
+  profile?: AdminProfileRow
+): string {
+  if (profile) {
+    const composed = [profile.firstName, profile.lastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+    const name =
+      profile.displayName ??
+      profile.fullName ??
+      (composed || undefined);
+    return name || user.email || user.id;
+  }
+  return user.email ?? user.id;
+}
+
+export function entityLabel(entity?: Record<string, unknown>): string {
+  if (!entity) return "—";
+  const email = typeof entity.email === "string" ? entity.email : null;
+  const name =
+    typeof entity.displayName === "string"
+      ? entity.displayName
+      : typeof entity.fullName === "string"
+        ? entity.fullName
+        : null;
+  if (name && email) return `${name} (${email})`;
+  return name ?? email ?? (typeof entity.id === "string" ? entity.id : "—");
+}
