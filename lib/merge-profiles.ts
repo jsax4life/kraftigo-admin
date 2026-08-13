@@ -36,15 +36,20 @@ export function profileDisplayName(
   return user.email ?? user.id;
 }
 
-export function entityLabel(entity?: Record<string, unknown>): string {
+export function entityLabel(
+  entity?: Record<string, unknown> | null
+): string {
   if (!entity) return "—";
   const email = typeof entity.email === "string" ? entity.email : null;
+  const first = typeof entity.firstName === "string" ? entity.firstName : "";
+  const last = typeof entity.lastName === "string" ? entity.lastName : "";
+  const composed = `${first} ${last}`.trim();
   const name =
     typeof entity.displayName === "string"
       ? entity.displayName
       : typeof entity.fullName === "string"
         ? entity.fullName
-        : null;
+        : composed || null;
   if (name && email) return `${name} (${email})`;
   return name ?? email ?? (typeof entity.id === "string" ? entity.id : "—");
 }

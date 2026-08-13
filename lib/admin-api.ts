@@ -59,9 +59,8 @@ export function parsePaginatedResponse<T>(
   data: unknown,
   label: string
 ): PaginatedResult<T> {
-  const raw = unwrapEntityPayload(data);
-  const rows = unwrapListPayload(raw);
-  const meta = extractMeta(raw, rows.length);
+  const rows = unwrapListPayload(data);
+  const meta = extractMeta(data, rows.length);
 
   const items: T[] = [];
   rows.forEach((row, index) => {

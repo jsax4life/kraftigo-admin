@@ -4,7 +4,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { AdminBooking } from "@/types/admin-bookings";
 import { entityLabel } from "@/lib/merge-profiles";
 
-function statusBadge(status?: string) {
+function statusBadge(status?: string | null) {
   if (!status) return <span className="text-slate-500">—</span>;
   return (
     <span className="inline-flex rounded-full border border-sky-500/40 bg-sky-500/10 px-2 py-0.5 text-[10px] text-sky-200">
@@ -43,6 +43,11 @@ export const adminBookingColumns: ColumnDef<AdminBooking>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => statusBadge(row.original.status)
+  },
+  {
+    accessorKey: "jobTitle",
+    header: "Job",
+    cell: ({ row }) => row.original.jobTitle ?? "—"
   },
   {
     id: "customer",
