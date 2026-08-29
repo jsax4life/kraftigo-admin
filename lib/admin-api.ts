@@ -51,6 +51,15 @@ function extractMeta(raw: unknown, rowCount: number): PaginatedMeta {
 
   if (meta.total == null && rowCount > 0) meta.total = rowCount;
 
+  if (
+    meta.totalPages == null &&
+    meta.total != null &&
+    meta.limit != null &&
+    meta.limit > 0
+  ) {
+    meta.totalPages = Math.max(1, Math.ceil(meta.total / meta.limit));
+  }
+
   return meta;
 }
 

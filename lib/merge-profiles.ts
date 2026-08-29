@@ -22,6 +22,12 @@ export function profileDisplayName(
   user: AdminUserRow,
   profile?: AdminProfileRow
 ): string {
+  const raw = user as Record<string, unknown>;
+  const fromUser = [raw.firstName, raw.lastName]
+    .filter((v): v is string => typeof v === "string" && v.length > 0)
+    .join(" ")
+    .trim();
+
   if (profile) {
     const composed = [profile.firstName, profile.lastName]
       .filter(Boolean)
@@ -30,10 +36,12 @@ export function profileDisplayName(
     const name =
       profile.displayName ??
       profile.fullName ??
-      (composed || undefined);
+      (composed || undefined) ??
+      (fromUser || undefined);
     return name || user.email || user.id;
   }
-  return user.email ?? user.id;
+
+  return fromUser || user.email || user.id;
 }
 
 export function entityLabel(

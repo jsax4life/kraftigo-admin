@@ -1,9 +1,12 @@
 import { apiClient } from "@/lib/api-client";
-import { parsePaginatedResponse, type PaginatedResult } from "@/lib/admin-api";
+import { parseEntityResponse, parsePaginatedResponse, type PaginatedResult } from "@/lib/admin-api";
 import {
   AdminUserRowSchema,
+  SendProfileReminderResponseSchema,
   type AdminUserRow,
-  type AdminUsersListParams
+  type AdminUsersListParams,
+  type SendProfileReminderDto,
+  type SendProfileReminderResponse
 } from "@/types/admin-users";
 
 function listParams(params?: AdminUsersListParams) {
@@ -42,6 +45,21 @@ export const usersAdminService = {
       AdminUserRowSchema,
       res.data,
       "intent krafters"
+    );
+  },
+
+  async sendProfileReminder(
+    userId: string,
+    body?: SendProfileReminderDto
+  ): Promise<SendProfileReminderResponse> {
+    const res = await apiClient.post(
+      `/api/admin/users/intent-krafters/${userId}/send-profile-reminder`,
+      body ?? { template: "auto" }
+    );
+    return parseEntityResponse(
+      SendProfileReminderResponseSchema,
+      res.data,
+      "profile reminder"
     );
   }
 };

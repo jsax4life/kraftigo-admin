@@ -1,6 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
+import { KrafterLocationCell } from "@/components/krafters/krafter-location-cell";
 import type { AdminUserWithProfile } from "@/types/admin-users";
 import { profileDisplayName } from "@/lib/merge-profiles";
 
@@ -20,7 +21,7 @@ function statusBadge(status?: string) {
   );
 }
 
-export const adminUserColumns: ColumnDef<AdminUserWithProfile>[] = [
+const baseColumns: ColumnDef<AdminUserWithProfile>[] = [
   {
     id: "name",
     header: "Name",
@@ -34,6 +35,11 @@ export const adminUserColumns: ColumnDef<AdminUserWithProfile>[] = [
     accessorKey: "email",
     header: "Email",
     cell: ({ row }) => row.original.email ?? "—"
+  },
+  {
+    id: "location",
+    header: "Location",
+    cell: ({ row }) => <KrafterLocationCell user={row.original} />
   },
   {
     accessorKey: "status",
@@ -59,16 +65,4 @@ export const adminUserColumns: ColumnDef<AdminUserWithProfile>[] = [
   }
 ];
 
-export const intentKrafterColumns: ColumnDef<AdminUserWithProfile>[] = [
-  ...adminUserColumns,
-  {
-    id: "onboarding",
-    header: "Onboarding started",
-    cell: ({ row }) =>
-      row.original.hasStartedArtisanOnboarding ? (
-        <span className="text-emerald-300">Yes</span>
-      ) : (
-        <span className="text-slate-500">No</span>
-      )
-  }
-];
+export const adminUserColumns: ColumnDef<AdminUserWithProfile>[] = baseColumns;

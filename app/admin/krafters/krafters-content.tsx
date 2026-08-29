@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { DataTable } from "@/components/tables/data-table";
-import {
-  adminUserColumns,
-  intentKrafterColumns
-} from "@/components/tables/admin-user-columns";
+import { adminUserColumns } from "@/components/tables/admin-user-columns";
+import { IntentKraftersList } from "@/components/krafters/intent-krafters-list";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import {
   useAdminIntentKrafters,
   useAdminKrafters
 } from "@/hooks/useAdminKrafters";
 
 type KrafterTab = "all" | "intent";
+
+const PAGE_SIZE = 20;
 
 function TableSkeleton() {
   return (
@@ -34,21 +36,43 @@ export default function KraftersPageContent() {
   const tab: KrafterTab =
     searchParams.get("tab") === "intent" ? "intent" : "all";
 
-  const krafters = useAdminKrafters();
-  const intentKrafters = useAdminIntentKrafters();
+  const [allPage, setAllPage] = useState(1);
+  const [intentPage, setIntentPage] = useState(1);
+
+  const page = tab === "intent" ? intentPage : allPage;
+  const setPage = tab === "intent" ? setIntentPage : setAllPage;
+
+  const listParams = { page, limit: PAGE_SIZE };
+
+  const krafters = useAdminKrafters(listParams, tab === "all");
+  const intentKrafters = useAdminIntentKrafters(
+    listParams,
+    tab === "intent"
+  );
 
   const activeQuery = tab === "intent" ? intentKrafters : krafters;
-  const columns = tab === "intent" ? intentKrafterColumns : adminUserColumns;
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-lg font-semibold">Krafters</h1>
         <p className="text-sm text-slate-400">
-          Artisan accounts from{" "}
-          <code className="text-[11px]">/api/admin/users/krafters</code> with
-          profiles from{" "}
-          <code className="text-[11px]">/api/admin/profiles/artisans</code>.
+          {tab === "intent" ? (
+            <>
+              Krafters who started onboarding — review gaps, location, and send
+              profile reminders.
+            </>
+          ) : (
+            <>
+              Artisan accounts from{" "}
+              <code className="text-[11px]">/api/admin/users/krafters</code>{" "}
+              with location and profiles from{" "}
+              <code className="text-[11px]">
+                /api/admin/profiles/artisans
+              </code>
+              .
+            </>
+          )}
         </p>
       </div>
 
@@ -84,10 +108,29 @@ export default function KraftersPageContent() {
       )}
       {!activeQuery.isLoading && !activeQuery.isError && (
         <>
-          {!activeQuery.data?.length ? (
+          {!activeQuery.data?.items.length ? (
             <p className="text-xs text-slate-400">No krafters found.</p>
           ) : (
-            <DataTable columns={columns} data={activeQuery.data} />
+            <div className="space-y-2">
+              {tab === "intent" ? (
+                <IntentKraftersList users={activeQuery.data.items} />
+              ) : (
+                <DataTable
+                  columns={adminUserColumns}
+                  data={activeQuery.data.items}
+                  serverPagination
+                />
+              )}
+              <PaginationBar
+                page={page}
+                meta={{
+                  ...activeQuery.data.meta,
+                  limit: activeQuery.data.meta.limit ?? PAGE_SIZE
+                }}
+                onPageChange={setPage}
+                isLoading={activeQuery.isFetching}
+              />
+            </div>
           )}
         </>
       )}

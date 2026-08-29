@@ -16,7 +16,10 @@ import {
   Search,
   Menu,
   ChevronLeft,
-  BadgeCheck
+  BadgeCheck,
+  ShieldAlert,
+  Activity,
+  CreditCard
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -31,6 +34,13 @@ const navItems = [
   },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/bookings", label: "Bookings", icon: BriefcaseBusiness },
+  { href: "/admin/disputes", label: "Disputes", icon: ShieldAlert },
+  { href: "/admin/risk", label: "Risk", icon: Activity },
+  {
+    href: "/admin/payment-operations",
+    label: "Payment ops",
+    icon: CreditCard
+  },
   { href: "/admin/services", label: "Services", icon: Wrench },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart2 },
   { href: "/admin/settings", label: "Settings", icon: Settings }

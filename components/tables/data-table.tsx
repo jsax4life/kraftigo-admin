@@ -16,23 +16,27 @@ type DataTableProps<TData, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pageSizeOptions?: number[];
+  /** When true, show all rows and hide client pagination (use with server-side paging). */
+  serverPagination?: boolean;
 };
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  pageSizeOptions = [10, 25, 50]
+  pageSizeOptions = [10, 25, 50],
+  serverPagination = false
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
-  const pageSizeDefault = useMemo(
-    () =>
-      data.length > 0 && data.length < pageSizeOptions[0]
-        ? data.length
-        : pageSizeOptions[0],
-    [data.length, pageSizeOptions]
-  );
+  const pageSizeDefault = useMemo(() => {
+    if (serverPagination) {
+      return Math.max(data.length, 1);
+    }
+    return data.length > 0 && data.length < pageSizeOptions[0]
+      ? data.length
+      : pageSizeOptions[0];
+  }, [data.length, pageSizeOptions, serverPagination]);
 
   const table = useReactTable({
     data,
@@ -137,6 +141,7 @@ export function DataTable<TData, TValue>({
         </table>
       </div>
 
+      {!serverPagination && (
       <div className="flex flex-col items-center justify-between gap-2 text-[11px] text-slate-400 sm:flex-row">
         <div className="flex items-center gap-2">
           <span>Rows per page</span>
@@ -180,6 +185,7 @@ export function DataTable<TData, TValue>({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
