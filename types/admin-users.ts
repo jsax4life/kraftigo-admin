@@ -95,6 +95,7 @@ export const KrafterLocationSummarySchema = z
   .object({
     city: z.string(),
     country: z.string().nullable().optional(),
+    label: z.string().optional(),
     count: z.coerce.number().optional(),
     krafterCount: z.coerce.number().optional()
   })

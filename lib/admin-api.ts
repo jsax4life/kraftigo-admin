@@ -19,6 +19,7 @@ export function unwrapListPayload(data: unknown): unknown[] {
     if (Array.isArray(o.data)) return o.data;
     if (Array.isArray(o.items)) return o.items;
     if (Array.isArray(o.results)) return o.results;
+    if (Array.isArray(o.locations)) return o.locations;
   }
   return [];
 }

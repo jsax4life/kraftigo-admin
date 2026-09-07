@@ -85,6 +85,7 @@ export function krafterLocationSummaryCount(
 export function krafterLocationSummaryLabel(
   location: KrafterLocationSummary
 ): string {
+  if (location.label) return location.label;
   const { city, country } = location;
   return country ? `${city}, ${country}` : city;
 }
