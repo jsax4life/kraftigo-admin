@@ -1,5 +1,6 @@
 "use client";
 
+import { KrafterLocationsPanel } from "@/components/krafters/krafter-locations-panel";
 import { StatCard } from "@/components/ui/stat-card";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 
@@ -73,6 +74,8 @@ export default function DashboardPage() {
           href="/admin/waitlist"
         />
       </div>
+
+      <KrafterLocationsPanel />
     </div>
   );
 }

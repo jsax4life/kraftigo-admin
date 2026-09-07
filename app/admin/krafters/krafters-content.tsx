@@ -2,15 +2,18 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DataTable } from "@/components/tables/data-table";
 import { adminUserColumns } from "@/components/tables/admin-user-columns";
 import { IntentKraftersList } from "@/components/krafters/intent-krafters-list";
+import { KrafterLocationFilter } from "@/components/krafters/krafter-location-filter";
 import { PaginationBar } from "@/components/ui/pagination-bar";
+import { CsvExportButton } from "@/components/ui/csv-export-button";
 import {
   useAdminIntentKrafters,
   useAdminKrafters
 } from "@/hooks/useAdminKrafters";
+import { usersAdminService } from "@/services/users-admin.service";
 
 type KrafterTab = "all" | "intent";
 
@@ -36,13 +39,29 @@ export default function KraftersPageContent() {
   const tab: KrafterTab =
     searchParams.get("tab") === "intent" ? "intent" : "all";
 
+  const locationCity = searchParams.get("locationCity") ?? undefined;
+  const locationCountry = searchParams.get("locationCountry") ?? undefined;
+
   const [allPage, setAllPage] = useState(1);
   const [intentPage, setIntentPage] = useState(1);
+
+  useEffect(() => {
+    setAllPage(1);
+  }, [locationCity, locationCountry]);
 
   const page = tab === "intent" ? intentPage : allPage;
   const setPage = tab === "intent" ? setIntentPage : setAllPage;
 
-  const listParams = { page, limit: PAGE_SIZE };
+  const listParams = {
+    page,
+    limit: PAGE_SIZE,
+    ...(tab === "all" && locationCity
+      ? {
+          locationCity,
+          ...(locationCountry ? { locationCountry } : {})
+        }
+      : {})
+  };
 
   const krafters = useAdminKrafters(listParams, tab === "all");
   const intentKrafters = useAdminIntentKrafters(
@@ -54,31 +73,46 @@ export default function KraftersPageContent() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold">Krafters</h1>
-        <p className="text-sm text-slate-400">
-          {tab === "intent" ? (
-            <>
-              Krafters who started onboarding — review gaps, location, and send
-              profile reminders.
-            </>
-          ) : (
-            <>
-              Artisan accounts from{" "}
-              <code className="text-[11px]">/api/admin/users/krafters</code>{" "}
-              with location and profiles from{" "}
-              <code className="text-[11px]">
-                /api/admin/profiles/artisans
-              </code>
-              .
-            </>
-          )}
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-lg font-semibold">Krafters</h1>
+          <p className="text-sm text-slate-400">
+            {tab === "intent" ? (
+              <>
+                Krafters who started onboarding — review gaps, location, and send
+                profile reminders.
+              </>
+            ) : (
+              <>
+                Artisan accounts from{" "}
+                <code className="text-[11px]">/api/admin/users/krafters</code>{" "}
+                with location and profiles from{" "}
+                <code className="text-[11px]">
+                  /api/admin/profiles/artisans
+                </code>
+                .
+              </>
+            )}
+          </p>
+        </div>
+        <CsvExportButton
+          label="Export krafters CSV"
+          onExport={() => usersAdminService.exportKraftersCsv()}
+          disabled={activeQuery.isLoading}
+        />
       </div>
 
       <div className="flex flex-wrap gap-2 text-xs">
         <Link
-          href="/admin/krafters"
+          href={
+            locationCity
+              ? `/admin/krafters?locationCity=${encodeURIComponent(locationCity)}${
+                  locationCountry
+                    ? `&locationCountry=${encodeURIComponent(locationCountry)}`
+                    : ""
+                }`
+              : "/admin/krafters"
+          }
           className={`rounded-full px-3 py-1.5 ${
             tab === "all"
               ? "bg-gradient-to-r from-emerald-400 to-sky-400 text-slate-950"
@@ -99,6 +133,8 @@ export default function KraftersPageContent() {
         </Link>
       </div>
 
+      {tab === "all" ? <KrafterLocationFilter /> : null}
+
       {activeQuery.isLoading && <TableSkeleton />}
       {activeQuery.isError && (
         <p className="text-xs text-rose-300">
@@ -109,7 +145,13 @@ export default function KraftersPageContent() {
       {!activeQuery.isLoading && !activeQuery.isError && (
         <>
           {!activeQuery.data?.items.length ? (
-            <p className="text-xs text-slate-400">No krafters found.</p>
+            <p className="text-xs text-slate-400">
+              {tab === "all" && locationCity
+                ? `No krafters found in ${locationCity}${
+                    locationCountry ? `, ${locationCountry}` : ""
+                  }.`
+                : "No krafters found."}
+            </p>
           ) : (
             <div className="space-y-2">
               {tab === "intent" ? (

@@ -1,6 +1,7 @@
 import type {
   AdminUserRow,
   KrafterLocation,
+  KrafterLocationSummary,
   KrafterOnboarding,
   OnboardingMissingSection
 } from "@/types/admin-users";
@@ -73,4 +74,43 @@ export function missingSectionLabels(
   sections: OnboardingMissingSection[] | undefined
 ): string[] {
   return sections?.map((s) => s.label) ?? [];
+}
+
+export function krafterLocationSummaryCount(
+  location: KrafterLocationSummary
+): number {
+  return location.count ?? location.krafterCount ?? 0;
+}
+
+export function krafterLocationSummaryLabel(
+  location: KrafterLocationSummary
+): string {
+  const { city, country } = location;
+  return country ? `${city}, ${country}` : city;
+}
+
+export function krafterLocationSummaryKey(
+  location: KrafterLocationSummary
+): string {
+  return `${location.city}|${location.country ?? ""}`;
+}
+
+export function krafterLocationFilterHref(
+  city: string,
+  country?: string | null
+): string {
+  const params = new URLSearchParams();
+  params.set("locationCity", city);
+  if (country) params.set("locationCountry", country);
+  return `/admin/krafters?${params.toString()}`;
+}
+
+export function matchesKrafterLocationFilter(
+  location: KrafterLocationSummary,
+  locationCity?: string | null,
+  locationCountry?: string | null
+): boolean {
+  if (!locationCity) return false;
+  if (location.city !== locationCity) return false;
+  return (locationCountry ?? "") === (location.country ?? "");
 }

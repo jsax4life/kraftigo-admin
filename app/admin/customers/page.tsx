@@ -2,7 +2,9 @@
 
 import { DataTable } from "@/components/tables/data-table";
 import { adminUserColumns } from "@/components/tables/admin-user-columns";
+import { CsvExportButton } from "@/components/ui/csv-export-button";
 import { useAdminCustomers } from "@/hooks/useAdminCustomers";
+import { usersAdminService } from "@/services/users-admin.service";
 
 function TableSkeleton() {
   return (
@@ -24,14 +26,21 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold">Customers</h1>
-        <p className="text-sm text-slate-400">
-          Customer accounts from{" "}
-          <code className="text-[11px]">/api/admin/users/customers</code> with
-          profiles from{" "}
-          <code className="text-[11px]">/api/admin/profiles/customers</code>.
-        </p>
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1 className="text-lg font-semibold">Customers</h1>
+          <p className="text-sm text-slate-400">
+            Customer accounts from{" "}
+            <code className="text-[11px]">/api/admin/users/customers</code> with
+            profiles from{" "}
+            <code className="text-[11px]">/api/admin/profiles/customers</code>.
+          </p>
+        </div>
+        <CsvExportButton
+          label="Export customers CSV"
+          onExport={() => usersAdminService.exportCustomersCsv()}
+          disabled={isLoading}
+        />
       </div>
 
       {isLoading && <TableSkeleton />}

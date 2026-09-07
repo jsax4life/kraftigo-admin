@@ -86,7 +86,23 @@ export type AdminUserWithProfile = AdminUserRow & {
 export type AdminUsersListParams = {
   page?: number;
   limit?: number;
+  locationCity?: string;
+  locationCountry?: string;
+  city?: string;
 };
+
+export const KrafterLocationSummarySchema = z
+  .object({
+    city: z.string(),
+    country: z.string().nullable().optional(),
+    count: z.coerce.number().optional(),
+    krafterCount: z.coerce.number().optional()
+  })
+  .passthrough();
+
+export type KrafterLocationSummary = z.infer<
+  typeof KrafterLocationSummarySchema
+>;
 
 export type SendProfileReminderDto = {
   template?: ProfileReminderTemplate;

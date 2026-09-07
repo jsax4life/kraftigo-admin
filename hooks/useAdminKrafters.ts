@@ -7,7 +7,8 @@ import { profilesAdminService } from "@/services/profiles-admin.service";
 import { usersAdminService } from "@/services/users-admin.service";
 import type {
   AdminUserWithProfile,
-  AdminUsersListParams
+  AdminUsersListParams,
+  KrafterLocationSummary
 } from "@/types/admin-users";
 
 export type PaginatedUsersWithProfiles = PaginatedResult<AdminUserWithProfile>;
@@ -52,8 +53,24 @@ export function useAdminKrafters(
   enabled = true
 ) {
   return useQuery<PaginatedUsersWithProfiles, Error>({
-    queryKey: ["admin", "krafters", params.page ?? 1, params.limit ?? 20],
+    queryKey: [
+      "admin",
+      "krafters",
+      params.page ?? 1,
+      params.limit ?? 20,
+      params.locationCity ?? "",
+      params.locationCountry ?? "",
+      params.city ?? ""
+    ],
     queryFn: () => fetchKraftersPage(usersAdminService.listKrafters, params),
+    enabled
+  });
+}
+
+export function useAdminKrafterLocations(enabled = true) {
+  return useQuery<KrafterLocationSummary[], Error>({
+    queryKey: ["admin", "krafters", "locations"],
+    queryFn: () => usersAdminService.listKrafterLocations(),
     enabled
   });
 }
